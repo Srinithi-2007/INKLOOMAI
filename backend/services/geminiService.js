@@ -1,0 +1,141 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+class GeminiServiceError extends Error {
+  constructor(message, status = 502) {
+    super(message);
+    this.name = "GeminiServiceError";
+    this.status = status;
+  }
+}
+
+function isScore(value) {
+  return Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+async function runComplianceReview({
+  content,
+  brandGuidelines,
+  campaignTitle,
+  platform,
+}) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new GeminiServiceError(
+      "Gemini is not configured. Set GEMINI_API_KEY on the backend and retry.",
+      503
+    );
+  }
+  if (typeof content !== "string" || !content.trim()) {
+    throw new GeminiServiceError("Content is required for AI analysis.", 400);
+  }
+  if (typeof brandGuidelines !== "string" || !brandGuidelines.trim()) {
+    throw new GeminiServiceError(
+      "This campaign has no brand guidelines to analyze against.",
+      422
+    );
+  }
+
+  const prompt = `
+You are an AI compliance analyst. Analyze the supplied draft only against the supplied campaign's actual brand guidelines. Do not approve, reject, or decide whether publication is allowed; a human brand administrator makes that decision.
+
+CAMPAIGN: ${campaignTitle || "Untitled campaign"}
+PLATFORM: ${platform || "Unspecified"}
+
+CAMPAIGN BRAND GUIDELINES:
+${brandGuidelines}
+
+DRAFT:
+${content}
+
+Return only JSON with these fields:
+{
+  "integrityScore": 0,
+  "auditScore": 0,
+  "criticalRisk": 0,
+  "toneDrift": 0,
+  "factMatch": 0,
+  "whisperConfidence": 0,
+  "tamperAlerts": 0,
+  "hasDisclaimer": false,
+  "sanitizedContent": "The original draft, or a proposed revision clearly preserving the author's intent",
+  "toneFit": { "label": "Tone fit", "detail": "Explanation grounded in the guidelines", "fit": 0 },
+  "transcript": { "before": "Original relevant text", "flagged": null, "after": "Proposed text or original text" },
+  "findings": [
+    { "id": "finding-1", "title": "Finding title", "rule": "Guideline name", "claim": "Quoted draft text", "suggestion": "Specific correction", "confidence": 0, "resolved": false }
+  ]
+}
+Scores and confidence must be numbers from 0 to 100. criticalRisk and tamperAlerts must be non-negative integers. Use an empty findings array when no findings apply. Do not invent a guideline that is not present.
+`;
+
+  try {
+    const client = new GoogleGenerativeAI(apiKey);
+    const model = client.getGenerativeModel({
+      model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
+      generationConfig: { responseMimeType: "application/json" },
+    });
+    const result = await model.generateContent(prompt);
+    const parsed = JSON.parse(result.response.text());
+
+    const scoreFields = [
+      "integrityScore",
+      "auditScore",
+      "toneDrift",
+      "factMatch",
+      "whisperConfidence",
+      "toneFit.fit",
+    ];
+    for (const field of scoreFields) {
+      const value =
+        field === "toneFit.fit"
+          ? parsed.toneFit?.fit
+          : parsed[field];
+      if (!isScore(value)) {
+        throw new Error(`Gemini response has an invalid ${field}.`);
+      }
+    }
+    if (
+      !Number.isInteger(parsed.criticalRisk) ||
+      parsed.criticalRisk < 0 ||
+      !Number.isInteger(parsed.tamperAlerts) ||
+      parsed.tamperAlerts < 0 ||
+      typeof parsed.hasDisclaimer !== "boolean" ||
+      typeof parsed.sanitizedContent !== "string" ||
+      typeof parsed.toneFit?.label !== "string" ||
+      typeof parsed.toneFit?.detail !== "string" ||
+      typeof parsed.transcript?.before !== "string" ||
+      typeof parsed.transcript?.after !== "string" ||
+      !Array.isArray(parsed.findings)
+    ) {
+      throw new Error("Gemini response is missing required analysis fields.");
+    }
+    for (const finding of parsed.findings) {
+      if (
+        typeof finding.id !== "string" ||
+        typeof finding.title !== "string" ||
+        typeof finding.rule !== "string" ||
+        typeof finding.claim !== "string" ||
+        typeof finding.suggestion !== "string" ||
+        !isScore(finding.confidence)
+      ) {
+        throw new Error("Gemini response contains a malformed finding.");
+      }
+      finding.resolved = false;
+    }
+
+    return {
+      ...parsed,
+      gateThreshold: 85,
+      decision: "pending",
+      originalContent: content,
+    };
+  } catch (error) {
+    if (error instanceof GeminiServiceError) throw error;
+    console.error("Gemini compliance analysis failed:", error.message);
+    throw new GeminiServiceError(
+      "Gemini analysis failed. Check the backend configuration and retry.",
+      502
+    );
+  }
+}
+
+module.exports = { runComplianceReview, GeminiServiceError };

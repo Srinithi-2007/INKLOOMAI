@@ -1,0 +1,13 @@
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/tsconfig.tsbuildinfo
+frontend/playwright-report/
+frontend/test-results/
+backend/node_modules/
+backend/.env
+.env
+.env.*
+!.env.example
+coverage/
+*.log

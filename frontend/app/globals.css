@@ -1,0 +1,337 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 252 248 255;
+    --foreground: 25 16 51;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas text-ink antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  * {
+    @apply border-line;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply min-h-screen flex flex-col;
+  }
+
+  .card {
+    @apply rounded-xl bg-white shadow-card;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm outline-none focus:border-brand;
+  }
+
+  .field-label {
+    @apply text-xs font-semibold text-ink-body;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium text-white bg-primary shadow-card hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium text-white bg-accent hover:bg-deep transition-colors;
+  }
+
+  .btn-outline {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium text-accent border border-[#e4dcf5] bg-white shadow-soft hover:bg-lavender/40 transition-colors;
+  }
+
+  .btn-soft {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium text-accent bg-lavender hover:bg-mist transition-colors;
+  }
+
+  .btn-danger {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium text-[#b42318] border border-[#f4c7c3] bg-white hover:bg-[#fef3f2] transition-colors;
+  }
+
+  .btn-lime {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium text-ink bg-lime hover:bg-[#84cc16] transition-colors;
+  }
+
+  .btn-dark {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium text-white bg-ink hover:bg-[#110c22] transition-colors;
+  }
+
+  .tag-muted {
+    @apply rounded-full bg-soft px-2 py-0.5 text-xs font-medium text-ink-body;
+  }
+
+  .tag-lime {
+    @apply rounded-full bg-lime px-2 py-0.5 text-xs font-bold text-ink;
+  }
+
+  .tag-red {
+    @apply rounded-full bg-red px-2 py-0.5 text-xs font-bold text-white;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.55px] text-muted;
+  }
+
+  .input-class {
+    @apply w-full rounded-lg border bg-canvas px-3 py-2 text-sm text-ink outline-none focus:border-brand;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+@layer utilities {
+  .text-ink {
+    color: #191033;
+  }
+
+  .text-ink-body {
+    color: #292344;
+  }
+
+  .text-ink-muted {
+    color: #605a7e;
+  }
+
+  .text-muted {
+    color: #605a7e;
+  }
+
+  .text-body {
+    color: #292344;
+  }
+
+  .text-accent {
+    color: #7252ED;
+  }
+
+  .text-brand {
+    color: #5934D3;
+  }
+
+  .text-violet {
+    color: #5934D3;
+  }
+
+  .text-green {
+    color: #16A34A;
+  }
+
+  .text-lime {
+    color: #A3E635;
+  }
+
+  .text-red {
+    color: #BA1A1A;
+  }
+
+  .text-danger {
+    color: #BA1A1A;
+  }
+
+  .text-amber {
+    color: #E8772E;
+  }
+
+  .text-success {
+    color: #16A34A;
+  }
+
+  .text-white {
+    color: white;
+  }
+
+  .bg-canvas {
+    background-color: #FCF8FF;
+  }
+
+  .bg-ink {
+    background-color: #191033;
+  }
+
+  .bg-brand {
+    background-color: #5934D3;
+  }
+
+  .bg-accent {
+    background-color: #7252ED;
+  }
+
+  .bg-lavender {
+    background-color: #F5F2FF;
+  }
+
+  .bg-mist {
+    background-color: #E4DFFC;
+  }
+
+  .bg-soft {
+    background-color: #EDE9FA;
+  }
+
+  .bg-lime {
+    background-color: #A3E635;
+  }
+
+  .bg-red {
+    background-color: #BA1A1A;
+  }
+
+  .bg-danger {
+    background-color: #BA1A1A;
+  }
+
+  .bg-green {
+    background-color: #16A34A;
+  }
+
+  .bg-mint {
+    background-color: #D1FAE5;
+  }
+
+  .bg-brand-50 {
+    background-color: #F5F2FF;
+  }
+
+  .bg-brand-100 {
+    background-color: #EDE9FA;
+  }
+
+  .bg-brand-600 {
+    background-color: #4A2EBB;
+  }
+
+  .bg-danger-100 {
+    background-color: #FEE2E2;
+  }
+
+  .bg-danger-900 {
+    background-color: #7F1D1D;
+  }
+
+  .bg-green-100 {
+    background-color: #D1FAE5;
+  }
+
+  .bg-green-900 {
+    background-color: #065F46;
+  }
+
+  .border-line {
+    border-color: #E4DFFC;
+  }
+
+  .border-brand {
+    border-color: #5934D3;
+  }
+
+  .border-danger {
+    border-color: #BA1A1A;
+  }
+
+  .shadow-card {
+    box-shadow: 0px 2px 12px 0px rgba(41,35,68,0.06);
+  }
+
+  .shadow-soft {
+    box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.05);
+  }
+
+  .shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  .font-heading {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .font-display {
+    font-family: 'Hanken Grotesk', sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .rounded-btn {
+    border-radius: 6px;
+  }
+
+  .rounded-card {
+    border-radius: 12px;
+  }
+
+  .rounded-xl {
+    border-radius: 16px;
+  }
+
+  .rounded-2xl {
+    border-radius: 20px;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E4DFFC;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D8D0F0;
+}
+
+/* Focus visible */
+.focus-visible-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40;
+}
+
+/* Glassmorphism */
+.glass {
+  @apply bg-white/80 backdrop-blur-md;
+}
+
+/* Gradient borders */
+.gradient-border {
+  @apply relative;
+}
+
+.gradient-border::before {
+  content: '';
+  @apply absolute inset-0 rounded-[inherit] bg-gradient-to-r from-primary to-accent -z-10 p-[1px];
+}
