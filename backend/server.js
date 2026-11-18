@@ -56,8 +56,12 @@ app.use("/api", (req, res, next) => {
     .then(() => next())
     .catch((error) => {
       console.error("MongoDB request connection failed:", error.message);
+      const isConfigMissing = !process.env.MONGODB_URI;
+      const errorMsg = isConfigMissing
+        ? "Database unavailable. Configure MONGODB_URI before using the API."
+        : `Database connection failed (${error.message}). Check MongoDB Atlas Network Access (allow 0.0.0.0/0) and credentials.`;
       res.status(503).json({
-        error: "Database unavailable. Configure MONGODB_URI before using the API.",
+        error: errorMsg,
       });
     });
 });

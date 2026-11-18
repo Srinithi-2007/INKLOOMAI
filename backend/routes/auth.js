@@ -4,7 +4,16 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
 function getJwtSecret() {
-  const secret = process.env.JWT_SECRET;
+  let secret = process.env.JWT_SECRET;
+  if (secret) {
+    secret = secret.trim();
+    if (
+      (secret.startsWith('"') && secret.endsWith('"')) ||
+      (secret.startsWith("'") && secret.endsWith("'"))
+    ) {
+      secret = secret.slice(1, -1).trim();
+    }
+  }
   if (!secret || secret.length < 32) {
     throw new Error("JWT_SECRET must be configured with at least 32 characters.");
   }

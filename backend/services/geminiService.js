@@ -18,7 +18,16 @@ async function runComplianceReview({
   campaignTitle,
   platform,
 }) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) {
+    apiKey = apiKey.trim();
+    if (
+      (apiKey.startsWith('"') && apiKey.endsWith('"')) ||
+      (apiKey.startsWith("'") && apiKey.endsWith("'"))
+    ) {
+      apiKey = apiKey.slice(1, -1).trim();
+    }
+  }
   if (!apiKey) {
     throw new GeminiServiceError(
       "Gemini is not configured. Set GEMINI_API_KEY on the backend and retry.",
