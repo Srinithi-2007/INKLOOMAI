@@ -1,12 +1,8 @@
 require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-  throw new Error("JWT_SECRET must be configured with at least 32 characters.");
-}
+const { connectToMongo } = require("./services/mongoConnection");
 
 const authRoutes = require("./routes/auth");
 const campaignRoutes = require("./routes/campaigns");
@@ -35,23 +31,35 @@ app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
 
 // Health check
-app.get("/api/health", (req, res) => {
-  const databaseConnected = mongoose.connection.readyState === 1;
-  res.status(databaseConnected ? 200 : 503).json({
-    status: databaseConnected ? "ok" : "degraded",
-    database: databaseConnected ? "connected" : "disconnected",
-    service: "inkloom-backend",
-    timestamp: new Date().toISOString(),
-  });
+app.get("/api/health", async (req, res) => {
+  try {
+    await connectToMongo();
+    res.json({
+      status: "ok",
+      database: "connected",
+      service: "inkloom-backend",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("MongoDB health check failed:", error.message);
+    res.status(503).json({
+      status: "degraded",
+      database: "disconnected",
+      service: "inkloom-backend",
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 app.use("/api", (req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    return res.status(503).json({
-      error: "Database unavailable. Configure MONGODB_URI before using the API.",
+  connectToMongo()
+    .then(() => next())
+    .catch((error) => {
+      console.error("MongoDB request connection failed:", error.message);
+      res.status(503).json({
+        error: "Database unavailable. Configure MONGODB_URI before using the API.",
+      });
     });
-  }
-  next();
 });
 
 // API routes
@@ -87,20 +95,18 @@ function startServer() {
   });
 }
 
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not configured; database routes are unavailable.");
+async function startLocalServer() {
+  try {
+    await connectToMongo();
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
+  }
   startServer();
-} else {
-  mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => {
-      console.log("Connected to MongoDB");
-      startServer();
-    })
-    .catch((err) => {
-      console.error("MongoDB connection error:", err.message);
-      startServer();
-    });
+}
+
+if (require.main === module && !process.env.VERCEL) {
+  startLocalServer();
 }
 
 module.exports = app;

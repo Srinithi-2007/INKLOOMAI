@@ -11,11 +11,11 @@ test("auth cookies use same-site defaults during local development", () => {
   });
 });
 
-test("auth cookies support cross-origin HTTPS deployments", () => {
+test("auth cookies remain same-site and secure in production", () => {
   assert.deepEqual(getCookieOptions(true), {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "lax",
     path: "/",
   });
 });

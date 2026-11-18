@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/backend";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
@@ -152,12 +152,7 @@ async function request<T>(
   path: string,
   init: RequestInit = {}
 ): Promise<T> {
-  const apiPath = process.env.NEXT_PUBLIC_API_URL
-    ? path
-    : path.startsWith("/api/")
-      ? path.slice(4)
-      : path;
-  const res = await fetch(`${API_BASE}${apiPath}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     credentials: "include",
     headers: {

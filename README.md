@@ -41,32 +41,29 @@ Requirements: Node.js 20+ and MongoDB Atlas (or a local MongoDB instance).
 
 4. Open [http://localhost:3000](http://localhost:3000). Backend health is available at `http://localhost:4000/api/health`.
 
-The frontend uses a local Next.js rewrite to proxy API requests to `http://localhost:4000` unless `NEXT_PUBLIC_API_URL` is set.
+The frontend uses a local Next.js rewrite to proxy `/api/*` requests to `http://localhost:4000` during `next dev`. In production, the Vercel service rewrites route those requests to the backend service.
 
-## Deploy
+## Deploy on Vercel
 
-One supported split-host setup is Vercel for the frontend and Render for the backend:
+The root `vercel.json` configures one Vercel project with two services:
 
-### Backend on Render
+- `backend` (`backend/`, Express) is public on `/api/*`.
+- `frontend` (`frontend/`, Next.js) is public on `/*`.
 
-1. Create a **Web Service** from this repository and set its **Root Directory** to `backend`.
-2. Use `npm ci` as the build command and `npm start` as the start command.
-3. Add these environment variables in Render (never commit their values):
-   - `NODE_ENV=production`
-   - `MONGODB_URI` — your MongoDB connection string.
-   - `JWT_SECRET` — a random secret of at least 32 characters.
-   - `GEMINI_API_KEY` — your Gemini API key.
-   - `GEMINI_MODEL=gemini-3.8-flash` (optional).
-   - `FRONTEND_URL=https://<your-vercel-domain>` — the exact deployed frontend origin.
-4. Allow the backend host to connect to your MongoDB Atlas cluster using Atlas network access settings.
+Import the repository into Vercel from the repository root; do not set the project root to `frontend`, because `vercel.json` declares both service roots. Configure these environment variables for the backend service in Vercel (never commit their values):
 
-### Frontend on Vercel
+- `NODE_ENV=production`
+- `MONGODB_URI` — your MongoDB connection string.
+- `JWT_SECRET` — a random secret of at least 32 characters.
+- `GEMINI_API_KEY` — your Gemini API key.
+- `GEMINI_MODEL=gemini-3.8-flash` (optional).
+- `FRONTEND_URL` — the Vercel project’s deployed origin.
 
-1. Import the repository and set the Vercel **Root Directory** to `frontend`.
-2. Set `NEXT_PUBLIC_API_URL` to the backend's public origin, for example `https://<your-render-service>.onrender.com` (no trailing slash).
-3. Deploy or redeploy after setting the environment variable.
+The browser calls the same-origin `/api/*` routes, which Vercel sends to the backend service. Do not set `NEXT_PUBLIC_API_URL` for this setup. No service binding is needed: there is no server-side frontend-to-backend call; the browser uses the public API route instead.
 
-Production auth cookies use `SameSite=None; Secure` for the split-origin frontend/backend setup. Confirm the deployed backend at `https://<your-render-service>.onrender.com/api/health`; it should report `status: "ok"` and `database: "connected"`.
+The Express app is exported for Vercel's request runtime; `app.listen()` is used only by local `npm start`. MongoDB connections are opened lazily and cached per warm backend instance.
+
+After deploying, check `https://<your-vercel-domain>/api/health`; it should report `status: "ok"` and `database: "connected"`. To run the multi-service project locally with Vercel’s routing, link the repository with the Vercel CLI and run `vercel dev` from the repository root. The separate `npm run dev` instructions above remain available for local frontend/backend development.
 
 ## Checks
 

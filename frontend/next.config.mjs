@@ -6,12 +6,11 @@ const nextConfig = {
     unoptimized: true,
   },
   async rewrites() {
-    return [
-      {
-        source: '/api/backend/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/:path*`,
-      },
-    ];
+    if (process.env.NODE_ENV !== 'development' || process.env.VERCEL) return [];
+    return [{
+      source: '/api/:path*',
+      destination: 'http://localhost:4000/api/:path*',
+    }];
   },
 };
 
