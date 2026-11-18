@@ -3,7 +3,13 @@ const router = express.Router();
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET;
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("JWT_SECRET must be configured with at least 32 characters.");
+  }
+  return secret;
+}
 
 function getCookieOptions(isProduction = process.env.NODE_ENV === "production") {
   return {
@@ -16,12 +22,9 @@ function getCookieOptions(isProduction = process.env.NODE_ENV === "production") 
 
 // Generate JWT token
 function generateToken(user) {
-  if (!JWT_SECRET || JWT_SECRET.length < 32) {
-    throw new Error("JWT_SECRET must be configured with at least 32 characters.");
-  }
   return jwt.sign(
     { userId: user._id, email: user.email, role: user.role },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: "7d" }
   );
 }
@@ -33,7 +36,7 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ error: "Authentication required" });
   }
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
     req.user = decoded;
     next();
   } catch (err) {
@@ -51,6 +54,15 @@ function requireRole(role) {
     next();
   };
 }
+
+router.use((req, res, next) => {
+  try {
+    getJwtSecret();
+    next();
+  } catch {
+    res.status(503).json({ error: "Authentication is not configured." });
+  }
+});
 
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
@@ -191,3 +203,4 @@ module.exports.authMiddleware = authMiddleware;
 module.exports.requireRole = requireRole;
 module.exports.generateToken = generateToken;
 module.exports.getCookieOptions = getCookieOptions;
+module.exports.getJwtSecret = getJwtSecret;
