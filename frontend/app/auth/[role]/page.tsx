@@ -141,7 +141,7 @@ export default function AuthPage({
   if (!isRoleSlug(params.role)) return null;
 
   return (
-    <main className="page-shell">
+    <main className="page-shell bg-canvas bg-auth-pattern px-4">
       <Header />
 
       <div className="mt-4 flex flex-col gap-6">

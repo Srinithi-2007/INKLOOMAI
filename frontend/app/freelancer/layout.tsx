@@ -10,9 +10,11 @@ export default function FreelancerLayout({
 }) {
   return (
     <RoleGuard role="freelancer">
-      <div className="mx-auto min-h-screen w-full max-w-[1120px] px-4">
-        <Header showNav />
-        {children}
+      <div className="min-h-screen w-full bg-canvas bg-freelancer-pattern">
+        <div className="mx-auto min-h-screen w-full max-w-[1120px] px-4">
+          <Header showNav />
+          {children}
+        </div>
       </div>
     </RoleGuard>
   );

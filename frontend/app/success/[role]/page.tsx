@@ -13,7 +13,7 @@ export default function SuccessPage({
   const isBrand = role === "brand";
 
   return (
-    <main className="page-shell">
+    <main className="page-shell bg-canvas bg-auth-pattern px-4">
       <Header />
 
       <div className="mt-4 flex flex-col gap-6 items-center text-center">

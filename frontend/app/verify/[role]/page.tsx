@@ -15,7 +15,7 @@ export default function VerifyPage({ params }: { params: { role: string } }) {
   }, [role, router]);
 
   return (
-    <main className="page-shell">
+    <main className="page-shell bg-canvas bg-auth-pattern px-4">
       <Header />
       <div className="mt-4 flex flex-col gap-2">
         <h1 className="text-[26px] font-semibold leading-9 tracking-[-0.6px] text-ink">

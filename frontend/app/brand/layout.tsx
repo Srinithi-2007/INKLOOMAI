@@ -36,7 +36,7 @@ export default function BrandLayout({
 
   return (
     <RoleGuard role="brand">
-      <div className="min-h-screen bg-canvas">
+      <div className="min-h-screen bg-canvas bg-brand-pattern">
       <header className="fixed inset-x-0 top-0 z-20 flex h-[72px] items-center justify-between border-b border-[#f0ebfa] bg-white">
         <div className="flex items-center gap-4 pl-4">
           <button

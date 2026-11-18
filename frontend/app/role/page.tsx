@@ -47,7 +47,7 @@ export default function RolePage({
   const isSignInIntent = searchParams?.intent === "signin" || searchParams?.mode === "signin";
 
   return (
-    <main className="page-shell">
+    <main className="page-shell bg-canvas bg-auth-pattern px-4">
       <Header />
 
       <div className="mt-4 flex flex-col gap-6">
