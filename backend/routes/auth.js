@@ -68,7 +68,8 @@ router.use((req, res, next) => {
   try {
     getJwtSecret();
     next();
-  } catch {
+  } catch (err) {
+    console.error("Authentication configuration check failed:", err.message);
     res.status(503).json({ error: "Authentication is not configured." });
   }
 });
