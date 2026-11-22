@@ -6,8 +6,15 @@ frontend/playwright-report/
 frontend/test-results/
 backend/node_modules/
 backend/.env
+backend/.env.*
+!backend/.env.example
 .env
 .env.*
 !.env.example
+frontend/.env.local
+backend/uploads/
+uploads/
 coverage/
 *.log
+.DS_Store
+Thumbs.db

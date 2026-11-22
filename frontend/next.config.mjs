@@ -6,7 +6,7 @@ const nextConfig = {
     unoptimized: true,
   },
   async rewrites() {
-    if (process.env.NODE_ENV !== 'development' || process.env.VERCEL) return [];
+    if (process.env.VERCEL) return [];
     return [{
       source: '/api/:path*',
       destination: 'http://localhost:4000/api/:path*',

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Logo from "./Logo";
 import Icon from "./Icon";
 import { Button, LinkButton } from "./Button";
+import NotificationBell from "./NotificationBell";
 import { useAuth } from "@/lib/auth";
 
 interface HeaderProps {
@@ -57,6 +58,7 @@ export default function Header({ right, showNav = false }: HeaderProps) {
                 >
                   {currentUser.role === "brand" ? "Brand Dashboard" : "Freelancer Dashboard"}
                 </Link>
+                <NotificationBell />
                 <Button type="button" variant="outline" fullWidth={false} onClick={handleLogout} className="!h-9 !min-h-[36px] shrink-0 whitespace-nowrap px-3 text-xs shadow-none">
                   Sign Out
                 </Button>

@@ -83,14 +83,14 @@ export interface ApiSubmission {
   wordCount: number;
   readingTimeSeconds: number;
   status:
-    | "Draft"
-    | "AI Review Pending"
-    | "AI Review Completed"
-    | "Submitted for Brand Approval"
-    | "Revision Requested"
-    | "Resubmitted"
-    | "Approved"
-    | "Rejected";
+  | "Draft"
+  | "AI Review Pending"
+  | "AI Review Completed"
+  | "Submitted for Brand Approval"
+  | "Revision Requested"
+  | "Resubmitted"
+  | "Approved"
+  | "Rejected";
   version: string;
   previousContentSnapshot: string;
   contentSnapshot: string;
@@ -375,4 +375,181 @@ export function reviewDecision(
 // Health
 export function healthCheck() {
   return request<{ status: string }>("/api/health");
+}
+
+// Brand DNA
+export interface BrandDnaSettings {
+  brandName: string;
+  orgName?: string;
+  industry?: string;
+  website?: string;
+  about?: string;
+  brandVoice: string;
+  corePillars: string[];
+  preferredTerms: string[];
+  bannedTerms: string[];
+  approvedClaims: string[];
+  visualGuidelines: string;
+  platformRules: Record<string, string>;
+  additionalRules: string[];
+  updatedAt?: string;
+}
+
+export function getBrandDna() {
+  return request<{ success: boolean; brandDna: BrandDnaSettings }>("/api/brand/dna");
+}
+
+export function updateBrandDna(data: Partial<BrandDnaSettings>) {
+  return request<{ success: boolean; message: string; brandDna: BrandDnaSettings }>(
+    "/api/brand/dna",
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }
+  );
+}
+
+// Assets & Files
+export interface ApiAsset {
+  id: string;
+  name: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  category: "brand_asset" | "deliverable" | "guideline" | "attachment";
+  url: string;
+  storageKey: string;
+  campaignId?: string;
+  submissionId?: string;
+  assignmentId?: string;
+  uploadedBy: string;
+  createdAt: string;
+}
+
+export async function uploadFile(
+  file: File,
+  fields: {
+    category?: string;
+    campaignId?: string;
+    submissionId?: string;
+    assignmentId?: string;
+    name?: string;
+  } = {}
+) {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (fields.category) formData.append("category", fields.category);
+  if (fields.campaignId) formData.append("campaignId", fields.campaignId);
+  if (fields.submissionId) formData.append("submissionId", fields.submissionId);
+  if (fields.assignmentId) formData.append("assignmentId", fields.assignmentId);
+  if (fields.name) formData.append("name", fields.name);
+
+  const res = await fetch(`${API_BASE}/api/files/upload`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new ApiError(data.error || "Upload failed", res.status);
+  }
+  return res.json() as Promise<{ message: string; asset: ApiAsset }>;
+}
+
+export function listFiles(query: { category?: string; campaignId?: string; submissionId?: string; assignmentId?: string } = {}) {
+  const params = new URLSearchParams();
+  if (query.category) params.append("category", query.category);
+  if (query.campaignId) params.append("campaignId", query.campaignId);
+  if (query.submissionId) params.append("submissionId", query.submissionId);
+  if (query.assignmentId) params.append("assignmentId", query.assignmentId);
+  const q = params.toString();
+  return request<{ assets: ApiAsset[] }>(`/api/files${q ? `?${q}` : ""}`);
+}
+
+export function getFile(id: string) {
+  return request<{ asset: ApiAsset }>(`/api/files/${id}`);
+}
+
+export function deleteFile(id: string) {
+  return request<{ message: string; id: string }>(`/api/files/${id}`, { method: "DELETE" });
+}
+
+// Notifications
+export interface ApiNotification {
+  id: string;
+  recipientId: string;
+  type: string;
+  title: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  data?: Record<string, any>;
+  createdAt: string;
+}
+
+export function listNotifications(options: { limit?: number; unreadOnly?: boolean } = {}) {
+  const params = new URLSearchParams();
+  if (options.limit) params.append("limit", String(options.limit));
+  if (options.unreadOnly) params.append("unreadOnly", "true");
+  const q = params.toString();
+  return request<{ notifications: ApiNotification[]; unreadCount: number }>(
+    `/api/notifications${q ? `?${q}` : ""}`
+  );
+}
+
+export function markNotificationRead(id: string) {
+  return request<{ message: string; notification: ApiNotification }>(`/api/notifications/${id}/read`, {
+    method: "PUT",
+  });
+}
+
+export function markAllNotificationsRead() {
+  return request<{ message: string }>("/api/notifications/read-all", { method: "PUT" });
+}
+
+// Governance Analytics
+export interface GovernanceAnalytics {
+  totalReviews: number;
+  totalSubmissions: number;
+  decisions: {
+    approved: number;
+    rejected: number;
+    pending: number;
+  };
+  approvalRate: number;
+  rejectionRate: number;
+  revisionFrequency: number;
+  averageComplianceScore: number;
+  averageIntegrityScore: number;
+  riskDistribution: {
+    Low: number;
+    Medium: number;
+    High: number;
+  };
+  recurringViolations: Array<{
+    rule: string;
+    count: number;
+  }>;
+  platformBreakdown: Array<{
+    platform: string;
+    submissions: number;
+    approved: number;
+    complianceScore: number;
+  }>;
+  auditTrail: Array<{
+    id: string;
+    submissionId: string;
+    campaignId: string | null;
+    decision: string;
+    auditScore: number;
+    integrityScore: number;
+    riskLevel?: string;
+    timestamp: string;
+  }>;
+}
+
+export function getGovernanceAnalytics(timeframe = "all") {
+  return request<{ success: boolean; analytics: GovernanceAnalytics }>(
+    `/api/analytics/governance?timeframe=${encodeURIComponent(timeframe)}`
+  );
 }

@@ -9,6 +9,10 @@ const campaignRoutes = require("./routes/campaigns");
 const assignmentRoutes = require("./routes/assignments");
 const submissionRoutes = require("./routes/submissions");
 const reviewRoutes = require("./routes/reviews");
+const brandDnaRoutes = require("./routes/brandDna");
+const fileRoutes = require("./routes/files");
+const notificationRoutes = require("./routes/notifications");
+const analyticsRoutes = require("./routes/analytics");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -125,6 +129,10 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/reviews/ai-review", aiLimiter);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/brand/dna", brandDnaRoutes);
+app.use("/api/files", fileRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {

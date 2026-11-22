@@ -37,7 +37,13 @@ async function stopTestServer() {
 
 function request({ method = "GET", path, body = null, headers = {}, cookie = "" }) {
   return new Promise((resolve, reject) => {
-    const postData = body ? (typeof body === "string" ? body : JSON.stringify(body)) : null;
+    const postData = body
+      ? Buffer.isBuffer(body)
+        ? body
+        : typeof body === "string"
+          ? body
+          : JSON.stringify(body)
+      : null;
     const reqHeaders = { ...headers };
 
     if (cookie) {

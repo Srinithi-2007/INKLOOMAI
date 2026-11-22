@@ -4,6 +4,7 @@ const Assignment = require("../models/Assignment");
 const Campaign = require("../models/Campaign");
 const User = require("../models/User");
 const Submission = require("../models/Submission");
+const notificationService = require("../services/notificationService");
 const { authMiddleware, requireRole } = require("./auth");
 
 // POST /api/assignments - assign a freelancer to a campaign (brand only)
@@ -60,6 +61,16 @@ router.post("/", authMiddleware, requireRole("brand"), async (req, res) => {
       campaign.creatorIds.push(freelancerId);
     }
     await campaign.save();
+
+    await notificationService.createAndDispatchNotification({
+      recipientId: freelancerId,
+      senderId: req.user.userId,
+      type: "assignment_created",
+      title: "New Assignment",
+      message: `You have been assigned to campaign "${campaign.name || campaign.title || "New Campaign"}".`,
+      link: "/freelancer",
+      metadata: { assignmentId: assignment._id.toString(), campaignId: campaign._id.toString() },
+    });
 
     res.status(201).json({ assignment, message: "Campaign assigned to freelancer" });
   } catch (err) {
@@ -136,6 +147,16 @@ router.put("/:id/status", authMiddleware, async (req, res) => {
 
     assignment.status = status;
     await assignment.save();
+
+    await notificationService.createAndDispatchNotification({
+      recipientId: assignment.brandId,
+      senderId: req.user.userId,
+      type: "assignment_accepted",
+      title: "Assignment Accepted",
+      message: `${req.user.fullName || "Freelancer"} accepted the assignment for "${assignment.campaignName || "Campaign"}".`,
+      link: "/brand/campaigns",
+      metadata: { assignmentId: assignment._id.toString(), campaignId: assignment.campaignId.toString() },
+    });
 
     res.json({ assignment, message: "Assignment status updated" });
   } catch (err) {

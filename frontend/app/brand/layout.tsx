@@ -6,12 +6,15 @@ import { useAuth } from "@/lib/auth";
 import Logo from "@/components/ui/Logo";
 import Icon from "@/components/ui/Icon";
 import RoleGuard from "@/components/auth/RoleGuard";
+import NotificationBell from "@/components/ui/NotificationBell";
 
 const BRAND_NAV = [
   { label: "Overview", href: "/brand", icon: "shield" },
+  { label: "Brand DNA", href: "/brand/dna", icon: "sparkles" },
   { label: "Campaigns", href: "/brand/campaigns", icon: "briefcase" },
   { label: "Reviews", href: "/brand/reviews", icon: "check" },
   { label: "Freelancers", href: "/brand/freelancers", icon: "users" },
+  { label: "Governance", href: "/brand/governance", icon: "bar-chart" },
 ] as const;
 
 export default function BrandLayout({
@@ -49,13 +52,13 @@ export default function BrandLayout({
           <Logo href="/" />
         </div>
 
-        <div className="hidden md:flex items-center gap-5">
+        <div className="hidden lg:flex items-center gap-2">
           <nav aria-label="Main Navigation" className="flex items-center gap-1">
             {BRAND_NAV.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="flex h-12 w-[200px] items-center gap-3 rounded-lg p-3.5 text-sm transition-colors text-ink-body hover:bg-brand-50"
+                className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm transition-colors text-ink-body hover:bg-brand-50"
               >
                 <Icon name={item.icon} className="h-4 w-4 shrink-0" />
                 {item.label}
@@ -67,6 +70,7 @@ export default function BrandLayout({
         <div className="flex items-center gap-3 pr-4">
           {currentUser ? (
             <div className="flex items-center gap-3">
+              <NotificationBell />
               <span className="hidden md:block text-sm text-muted">
                 {currentUser.fullName} ({currentUser.role})
               </span>

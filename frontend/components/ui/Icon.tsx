@@ -17,7 +17,12 @@ export type IconName =
   | "pen"
   | "x"
   | "menu"
-  | "refresh";
+  | "refresh"
+  | "bell"
+  | "paperclip"
+  | "bar-chart"
+  | "download"
+  | "trash";
 
 const paths: Record<IconName, string> = {
   "arrow-right": "M5 12h14M13 6l6 6-6 6",
@@ -37,6 +42,11 @@ const paths: Record<IconName, string> = {
   x: "M6 6l12 12M18 6L6 18",
   menu: "M4 6h16M4 12h16M4 18h16",
   refresh: "M21 12a9 9 0 00-9-9 9.75 9.75 0 00-6.74 2.74L3 8m0 0V3m0 5h5M3 12a9 9 0 009 9 9.75 9.75 0 006.74-2.74L21 16m0 0v5m0-5h-5",
+  bell: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0",
+  paperclip: "M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48",
+  "bar-chart": "M18 20V10M12 20V4M6 20v-6",
+  download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
+  trash: "M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
 };
 
 type Props = SVGProps<SVGSVGElement> & { name: IconName; size?: number };

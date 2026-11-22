@@ -122,7 +122,7 @@ export default function BrandOverviewPage() {
         </div>
 
         {/* Quick Actions */}
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <LinkButtonCard
             icon="briefcase"
             title="Create Campaign"
@@ -143,9 +143,15 @@ export default function BrandOverviewPage() {
           />
           <LinkButtonCard
             icon="sparkles"
-            title="Campaign Guidelines"
-            hint="Manage requirements and brand rules"
-            href="/brand/campaigns"
+            title="Brand DNA & Guidelines"
+            hint="Voice, pillars, banned words & rules"
+            href="/brand/dna"
+          />
+          <LinkButtonCard
+            icon="bar-chart"
+            title="Governance Analytics"
+            hint="Compliance health & audit trail"
+            href="/brand/governance"
           />
         </section>
 

@@ -17,6 +17,16 @@ const userSchema = new mongoose.Schema(
     size: { type: String, trim: true },
     about: { type: String, trim: true },
 
+    // Brand DNA fields
+    brandVoice: { type: String, trim: true, default: "" },
+    corePillars: { type: [String], default: [] },
+    preferredTerms: { type: [String], default: [] },
+    bannedTerms: { type: [String], default: [] },
+    approvedClaims: { type: [String], default: [] },
+    visualGuidelines: { type: String, trim: true, default: "" },
+    platformRules: { type: Object, default: {} },
+    additionalRules: { type: [String], default: [] },
+
     // Freelancer-specific fields
     specialization: { type: String, trim: true },
     portfolio: { type: String, trim: true },
@@ -51,6 +61,14 @@ userSchema.methods.toPublicJSON = function () {
     specialization,
     portfolio,
     bio,
+    brandVoice,
+    corePillars,
+    preferredTerms,
+    bannedTerms,
+    approvedClaims,
+    visualGuidelines,
+    platformRules,
+    additionalRules,
     createdAt,
   } = this;
   return {
@@ -65,6 +83,14 @@ userSchema.methods.toPublicJSON = function () {
     website,
     size,
     about,
+    brandVoice: brandVoice || "",
+    corePillars: Array.isArray(corePillars) ? corePillars : [],
+    preferredTerms: Array.isArray(preferredTerms) ? preferredTerms : [],
+    bannedTerms: Array.isArray(bannedTerms) ? bannedTerms : [],
+    approvedClaims: Array.isArray(approvedClaims) ? approvedClaims : [],
+    visualGuidelines: visualGuidelines || "",
+    platformRules: platformRules || {},
+    additionalRules: Array.isArray(additionalRules) ? additionalRules : [],
     specialization,
     portfolio,
     bio,

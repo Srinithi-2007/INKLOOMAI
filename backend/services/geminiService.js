@@ -79,11 +79,11 @@ Scores and confidence must be numbers from 0 to 100. criticalRisk and tamperAler
   try {
     const client = new GoogleGenerativeAI(apiKey);
     const model = client.getGenerativeModel({
-      model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
+      model: process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
       generationConfig: { responseMimeType: "application/json" },
     });
 
-    const timeoutMs = 25000;
+    const timeoutMs = 35000;
     const generatePromise = model.generateContent(prompt);
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(
@@ -155,6 +155,12 @@ Scores and confidence must be numbers from 0 to 100. criticalRisk and tamperAler
       throw new GeminiServiceError(
         "Gemini service is currently experiencing high demand. Please try again shortly.",
         503
+      );
+    }
+    if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("quota") || msg.includes("Quota")) {
+      throw new GeminiServiceError(
+        "Gemini API rate limit or quota exceeded. Please try again shortly.",
+        429
       );
     }
     if (msg.includes("404") || msg.includes("not found")) {

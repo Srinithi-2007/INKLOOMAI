@@ -9,8 +9,12 @@ import {
   runAIReview,
   submitForApproval,
   updateAssignmentStatus,
+  uploadFile,
+  listFiles,
+  deleteFile,
   type ApiAssignment,
   type ApiSubmission,
+  type ApiAsset,
 } from "@/lib/api";
 import Icon from "@/components/ui/Icon";
 
@@ -121,7 +125,51 @@ function AssignmentCard({
   const [body, setBody] = useState(submission?.body ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [assets, setAssets] = useState<ApiAsset[]>([]);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const editable = !submission || submission.status === "Draft" || submission.status === "Revision Requested";
+
+  useEffect(() => {
+    async function loadAttachments() {
+      try {
+        const res = await listFiles({ assignmentId: assignment.id });
+        setAssets(res.assets);
+      } catch (_) {}
+    }
+    loadAttachments();
+  }, [assignment.id]);
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFile(true);
+    setUploadError(null);
+    try {
+      const res = await uploadFile(file, {
+        category: "submission_attachment",
+        assignmentId: assignment.id,
+        campaignId: assignment.campaignId,
+        submissionId: submission?.id,
+        name: file.name,
+      });
+      setAssets((prev) => [res.asset, ...prev]);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Failed to upload file");
+    } finally {
+      setUploadingFile(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleDeleteFile(assetId: string) {
+    try {
+      await deleteFile(assetId);
+      setAssets((prev) => prev.filter((a) => a.id !== assetId));
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Failed to remove file");
+    }
+  }
 
   async function perform(action: () => Promise<void>) {
     setBusy(true);
@@ -271,6 +319,67 @@ function AssignmentCard({
               required
             />
           </label>
+
+          {/* Persistent File Attachments */}
+          <div className="flex flex-col gap-2 rounded-xl border border-[#ebe4f7] bg-canvas/40 p-3.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-ink flex items-center gap-1.5">
+                <Icon name="paperclip" size={14} className="text-accent" />
+                Attached Assets & Media ({assets.length})
+              </span>
+              <label className="cursor-pointer text-xs font-semibold text-accent hover:underline flex items-center gap-1">
+                <span>{uploadingFile ? "Uploading..." : "+ Attach File"}</span>
+                <input
+                  type="file"
+                  className="hidden"
+                  disabled={uploadingFile || busy}
+                  onChange={handleFileUpload}
+                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain"
+                />
+              </label>
+            </div>
+
+            {uploadError && (
+              <p className="text-[11px] text-red-600">{uploadError}</p>
+            )}
+
+            {assets.length === 0 ? (
+              <p className="text-[11px] text-muted italic">
+                No files attached. Attach supporting images, copy docs, or PDF proofs (max 10MB).
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {assets.map((asset) => (
+                  <div
+                    key={asset.id}
+                    className="flex items-center gap-2 rounded-lg border border-[#e4dcf5] bg-white px-2.5 py-1 text-xs text-ink shadow-2xs"
+                  >
+                    <Icon name="paperclip" size={12} className="text-muted" />
+                    <a
+                      href={asset.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium hover:text-accent hover:underline truncate max-w-[140px]"
+                      title={asset.originalName}
+                    >
+                      {asset.name || asset.originalName}
+                    </a>
+                    <span className="text-[10px] text-muted">
+                      ({(asset.size / 1024).toFixed(0)} KB)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteFile(asset.id)}
+                      className="text-muted hover:text-red-500 transition-colors ml-1"
+                      title="Remove attachment"
+                    >
+                      <Icon name="trash" size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {submission?.status === "Revision Requested" ? (
               <button

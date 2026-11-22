@@ -5,6 +5,7 @@ const Assignment = require("../models/Assignment");
 const Review = require("../models/Review");
 const Revision = require("../models/Revision");
 const Campaign = require("../models/Campaign");
+const notificationService = require("../services/notificationService");
 const { authMiddleware, requireRole } = require("./auth");
 
 // POST /api/submissions - create or update a submission (freelancer only)
@@ -166,6 +167,16 @@ router.put("/:id/submit", authMiddleware, requireRole("freelancer"), async (req,
       { status: "submitted" }
     );
 
+    await notificationService.createAndDispatchNotification({
+      recipientId: submission.brandId,
+      senderId: req.user.userId,
+      type: "submission_received",
+      title: "New Submission",
+      message: `A draft for "${submission.title}" was submitted for your approval.`,
+      link: "/brand/reviews",
+      metadata: { submissionId: submission._id.toString(), campaignId: submission.campaignId.toString() },
+    });
+
     res.json({ submission, message: "Submitted for brand approval" });
   } catch (err) {
     console.error("Submission submit failed:", err.message);
@@ -222,6 +233,16 @@ router.put("/:id/approve", authMiddleware, requireRole("brand"), async (req, res
       await campaign.save();
     }
 
+    await notificationService.createAndDispatchNotification({
+      recipientId: submission.freelancerId,
+      senderId: req.user.userId,
+      type: "review_approved",
+      title: "Content Approved",
+      message: `Your submission "${submission.title}" has been approved!`,
+      link: "/freelancer",
+      metadata: { submissionId: submission._id.toString(), campaignId: submission.campaignId.toString() },
+    });
+
     res.json({ submission, message: "Submission approved" });
   } catch (err) {
     console.error("Submission approval failed:", err.message);
@@ -267,6 +288,16 @@ router.put("/:id/reject", authMiddleware, requireRole("brand"), async (req, res)
       { _id: submission.assignmentId, brandId: req.user.userId },
       { status: "rejected" }
     );
+
+    await notificationService.createAndDispatchNotification({
+      recipientId: submission.freelancerId,
+      senderId: req.user.userId,
+      type: "review_rejected",
+      title: "Content Rejected",
+      message: `Your submission "${submission.title}" was rejected.`,
+      link: "/freelancer",
+      metadata: { submissionId: submission._id.toString(), campaignId: submission.campaignId.toString() },
+    });
 
     res.json({ submission, message: "Submission rejected" });
   } catch (err) {
@@ -336,6 +367,16 @@ router.put("/:id/revision-requested", authMiddleware, requireRole("brand"), asyn
       { status: "revision-requested" }
     );
 
+    await notificationService.createAndDispatchNotification({
+      recipientId: submission.freelancerId,
+      senderId: req.user.userId,
+      type: "revision_requested",
+      title: "Revision Requested",
+      message: `Revisions requested for "${submission.title}": ${note.trim().slice(0, 100)}`,
+      link: "/freelancer",
+      metadata: { submissionId: submission._id.toString(), note: note.trim() },
+    });
+
     res.json({ submission, revision, message: "Revision requested" });
   } catch (err) {
     console.error("Revision request failed:", err.message);
@@ -391,6 +432,16 @@ router.put("/:id/resubmit", authMiddleware, requireRole("freelancer"), async (re
       { _id: submission.assignmentId, freelancerId: req.user.userId },
       { status: "resubmitted" }
     );
+
+    await notificationService.createAndDispatchNotification({
+      recipientId: submission.brandId,
+      senderId: req.user.userId,
+      type: "submission_received",
+      title: "Submission Resubmitted",
+      message: `Revised content submitted for "${submission.title}".`,
+      link: "/brand/reviews",
+      metadata: { submissionId: submission._id.toString(), campaignId: submission.campaignId.toString() },
+    });
 
     res.json({ submission, message: "Content resubmitted for review" });
   } catch (err) {

@@ -5,6 +5,7 @@ const Submission = require("../models/Submission");
 const Assignment = require("../models/Assignment");
 const Campaign = require("../models/Campaign");
 const Revision = require("../models/Revision");
+const User = require("../models/User");
 const { runComplianceReview, GeminiServiceError } = require("../services/geminiService");
 const withMongoTransaction = require("../services/withMongoTransaction");
 const { authMiddleware, requireRole } = require("./auth");
@@ -29,7 +30,7 @@ router.post("/ai-review", authMiddleware, requireRole("freelancer"), async (req,
       });
     }
 
-    const [assignment, campaign] = await Promise.all([
+    const [assignment, campaign, brandUser] = await Promise.all([
       Assignment.findOne({
         _id: submission.assignmentId,
         freelancerId: req.user.userId,
@@ -39,17 +40,23 @@ router.post("/ai-review", authMiddleware, requireRole("freelancer"), async (req,
         _id: submission.campaignId,
         brandId: submission.brandId,
       }),
+      User.findById(submission.brandId),
     ]);
     if (!assignment || !campaign) {
       return res.status(404).json({ error: "Campaign assignment not found" });
     }
 
-    const guidelines = [
-      campaign.brief?.guidelines,
-      campaign.brief?.contentRequirements,
-    ]
-      .filter((value) => typeof value === "string" && value.trim())
-      .join("\n\nContent requirements:\n");
+    const dnaSections = [];
+    if (brandUser?.brandVoice) dnaSections.push(`Brand Voice / Tone: ${brandUser.brandVoice}`);
+    if (brandUser?.corePillars?.length) dnaSections.push(`Core Brand Pillars: ${brandUser.corePillars.join(", ")}`);
+    if (brandUser?.preferredTerms?.length) dnaSections.push(`Preferred Terminology: ${brandUser.preferredTerms.join(", ")}`);
+    if (brandUser?.bannedTerms?.length) dnaSections.push(`Banned Words / Disallowed Terms: ${brandUser.bannedTerms.join(", ")}`);
+    if (brandUser?.approvedClaims?.length) dnaSections.push(`Approved Enterprise Claims: ${brandUser.approvedClaims.join("; ")}`);
+    if (brandUser?.visualGuidelines) dnaSections.push(`Visual & Style Guidelines: ${brandUser.visualGuidelines}`);
+    if (campaign.brief?.guidelines) dnaSections.push(`Campaign Guidelines: ${campaign.brief.guidelines}`);
+    if (campaign.brief?.contentRequirements) dnaSections.push(`Content Requirements: ${campaign.brief.contentRequirements}`);
+
+    const guidelines = dnaSections.join("\n\n") || "Professional and compliant enterprise brand tone.";
 
     const aiResult = await runComplianceReview({
       content: submission.body,
