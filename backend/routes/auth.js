@@ -198,6 +198,59 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /api/auth/me - update user profile / Brand DNA (authenticated)
+router.put("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const {
+      fullName,
+      orgName,
+      brandName,
+      industry,
+      website,
+      size,
+      about,
+      specialization,
+      portfolio,
+      bio,
+    } = req.body || {};
+
+    if (fullName !== undefined) {
+      if (typeof fullName !== "string" || fullName.trim().length < 2 || fullName.trim().length > 120) {
+        return res.status(400).json({ error: "Full name must be between 2 and 120 characters" });
+      }
+      user.fullName = fullName.trim();
+    }
+
+    if (user.role === "brand") {
+      if (orgName !== undefined) user.orgName = typeof orgName === "string" ? orgName.trim() : "";
+      if (brandName !== undefined) user.brandName = typeof brandName === "string" ? brandName.trim() : "";
+      if (industry !== undefined) user.industry = typeof industry === "string" ? industry.trim() : "";
+      if (website !== undefined) user.website = typeof website === "string" ? website.trim() : "";
+      if (size !== undefined) user.size = typeof size === "string" ? size.trim() : "";
+      if (about !== undefined) user.about = typeof about === "string" ? about.trim() : "";
+    } else if (user.role === "freelancer") {
+      if (specialization !== undefined) user.specialization = typeof specialization === "string" ? specialization.trim() : "";
+      if (portfolio !== undefined) user.portfolio = typeof portfolio === "string" ? portfolio.trim() : "";
+      if (bio !== undefined) user.bio = typeof bio === "string" ? bio.trim() : "";
+    }
+
+    await user.save();
+    res.json({
+      success: true,
+      user: user.toPublicJSON(),
+      message: "Profile updated successfully",
+    });
+  } catch (err) {
+    console.error("Profile update failed:", err.message);
+    res.status(500).json({ error: "Could not update profile" });
+  }
+});
+
 // GET /api/auth/users - list users (for brand to see freelancers)
 router.get("/users", authMiddleware, requireRole("brand"), async (req, res) => {
   try {

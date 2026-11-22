@@ -82,7 +82,17 @@ Scores and confidence must be numbers from 0 to 100. criticalRisk and tamperAler
       model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
       generationConfig: { responseMimeType: "application/json" },
     });
-    const result = await model.generateContent(prompt);
+
+    const timeoutMs = 25000;
+    const generatePromise = model.generateContent(prompt);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(
+        () => reject(new GeminiServiceError("Gemini analysis timed out after 25s.", 504)),
+        timeoutMs
+      );
+    });
+
+    const result = await Promise.race([generatePromise, timeoutPromise]);
     const parsed = JSON.parse(result.response.text());
 
     const scoreFields = [
@@ -140,6 +150,25 @@ Scores and confidence must be numbers from 0 to 100. criticalRisk and tamperAler
   } catch (error) {
     if (error instanceof GeminiServiceError) throw error;
     console.error("Gemini compliance analysis failed:", error.message);
+    const msg = error.message || "";
+    if (msg.includes("503") || msg.includes("high demand") || msg.includes("UNAVAILABLE")) {
+      throw new GeminiServiceError(
+        "Gemini service is currently experiencing high demand. Please try again shortly.",
+        503
+      );
+    }
+    if (msg.includes("404") || msg.includes("not found")) {
+      throw new GeminiServiceError(
+        "Gemini model not found. Check GEMINI_MODEL configuration.",
+        502
+      );
+    }
+    if (msg.includes("API key not valid") || msg.includes("403") || msg.includes("PERMISSION_DENIED")) {
+      throw new GeminiServiceError(
+        "Gemini API key is invalid or not authorized.",
+        502
+      );
+    }
     throw new GeminiServiceError(
       "Gemini analysis failed. Check the backend configuration and retry.",
       502

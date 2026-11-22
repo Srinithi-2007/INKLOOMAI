@@ -56,7 +56,7 @@ router.post("/", authMiddleware, requireRole("brand"), async (req, res) => {
     // Update campaign stats
     campaign.submissionsTotal = (campaign.submissionsTotal || 0) + 1;
     if (campaign.status === "draft") campaign.status = "active";
-    if (!campaign.creatorIds.includes(freelancerId)) {
+    if (!campaign.creatorIds.some((id) => id.toString() === freelancerId)) {
       campaign.creatorIds.push(freelancerId);
     }
     await campaign.save();

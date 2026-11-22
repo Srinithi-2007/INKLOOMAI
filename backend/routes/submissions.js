@@ -4,6 +4,7 @@ const Submission = require("../models/Submission");
 const Assignment = require("../models/Assignment");
 const Review = require("../models/Review");
 const Revision = require("../models/Revision");
+const Campaign = require("../models/Campaign");
 const { authMiddleware, requireRole } = require("./auth");
 
 // POST /api/submissions - create or update a submission (freelancer only)
@@ -43,6 +44,7 @@ router.post("/", authMiddleware, requireRole("freelancer"), async (req, res) => 
 
     const charCount = body ? body.length : 0;
     const wordCount = body ? body.split(/\s+/).filter(Boolean).length : 0;
+    const readingTimeSeconds = Math.ceil((wordCount / 200) * 60);
 
     let submission = await Submission.findOne({
       assignmentId,
@@ -62,6 +64,7 @@ router.post("/", authMiddleware, requireRole("freelancer"), async (req, res) => 
       submission.attachedAssets = attachedAssets || submission.attachedAssets;
       submission.charCount = charCount;
       submission.wordCount = wordCount;
+      submission.readingTimeSeconds = readingTimeSeconds;
       submission.contentSnapshot = body;
       await submission.save();
     } else {
@@ -76,6 +79,7 @@ router.post("/", authMiddleware, requireRole("freelancer"), async (req, res) => 
         attachedAssets: attachedAssets || [],
         charCount,
         wordCount,
+        readingTimeSeconds,
         status: "Draft",
         version: "1.0",
         contentSnapshot: body,
@@ -208,10 +212,66 @@ router.put("/:id/approve", authMiddleware, requireRole("brand"), async (req, res
       { status: "approved" }
     );
 
+    const campaign = await Campaign.findById(submission.campaignId);
+    if (campaign) {
+      campaign.submissionsDone = (campaign.submissionsDone || 0) + 1;
+      campaign.aiPass = (campaign.aiPass || 0) + 1;
+      if (campaign.submissionsDone >= (campaign.submissionsTotal || 1)) {
+        campaign.status = "completed";
+      }
+      await campaign.save();
+    }
+
     res.json({ submission, message: "Submission approved" });
   } catch (err) {
     console.error("Submission approval failed:", err.message);
     res.status(500).json({ error: "Could not approve submission" });
+  }
+});
+
+// PUT /api/submissions/:id/reject - reject submission (brand only)
+router.put("/:id/reject", authMiddleware, requireRole("brand"), async (req, res) => {
+  try {
+    if (!/^[a-f\d]{24}$/i.test(req.params.id)) {
+      return res.status(400).json({ error: "Invalid submission identifier" });
+    }
+    const submission = await Submission.findOne({
+      _id: req.params.id,
+      brandId: req.user.userId,
+    });
+    if (!submission) {
+      return res.status(404).json({ error: "Submission not found" });
+    }
+    const review = await Review.findOne({
+      submissionId: submission._id,
+      brandId: req.user.userId,
+    });
+    if (
+      !review ||
+      review.decision !== "pending" ||
+      submission.status !== "AI Review Completed"
+    ) {
+      return res.status(409).json({
+        error: "A pending AI review is required before deciding on this submission.",
+      });
+    }
+
+    submission.status = "Rejected";
+    await submission.save();
+    review.decision = "rejected";
+    review.reviewedBy = req.user.userId;
+    review.reviewedAt = new Date();
+    await review.save();
+
+    await Assignment.findOneAndUpdate(
+      { _id: submission.assignmentId, brandId: req.user.userId },
+      { status: "rejected" }
+    );
+
+    res.json({ submission, message: "Submission rejected" });
+  } catch (err) {
+    console.error("Submission rejection failed:", err.message);
+    res.status(500).json({ error: "Could not reject submission" });
   }
 });
 
@@ -313,6 +373,7 @@ router.put("/:id/resubmit", authMiddleware, requireRole("freelancer"), async (re
     if (title) submission.title = title.trim();
     submission.charCount = submission.body.length;
     submission.wordCount = submission.body.split(/\s+/).filter(Boolean).length;
+    submission.readingTimeSeconds = Math.ceil((submission.wordCount / 200) * 60);
     submission.contentSnapshot = submission.body;
     const currentVersion = Number.parseFloat(submission.version);
     submission.version = Number.isFinite(currentVersion)
@@ -335,6 +396,31 @@ router.put("/:id/resubmit", authMiddleware, requireRole("freelancer"), async (re
   } catch (err) {
     console.error("Submission resubmit failed:", err.message);
     res.status(500).json({ error: "Could not resubmit content" });
+  }
+});
+
+// GET /api/submissions/:id/revisions - get revision history
+router.get("/:id/revisions", authMiddleware, async (req, res) => {
+  try {
+    if (!/^[a-f\d]{24}$/i.test(req.params.id)) {
+      return res.status(400).json({ error: "Invalid submission identifier" });
+    }
+    const submission = await Submission.findById(req.params.id);
+    if (!submission) {
+      return res.status(404).json({ error: "Submission not found" });
+    }
+    if (
+      (req.user.role === "brand" && submission.brandId.toString() !== req.user.userId) ||
+      (req.user.role === "freelancer" && submission.freelancerId.toString() !== req.user.userId)
+    ) {
+      return res.status(403).json({ error: "Not authorized to view revisions for this submission" });
+    }
+
+    const revisions = await Revision.find({ submissionId: req.params.id }).sort({ createdAt: -1 });
+    res.json({ revisions });
+  } catch (err) {
+    console.error("Revisions lookup failed:", err.message);
+    res.status(500).json({ error: "Could not load revisions" });
   }
 });
 

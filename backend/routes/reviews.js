@@ -232,6 +232,15 @@ router.put("/:id/decision", authMiddleware, requireRole("brand"), async (req, re
 
       if (decision === "approved") {
         submission.status = "Approved";
+        const campaign = await Campaign.findById(submission.campaignId).session(session);
+        if (campaign) {
+          campaign.submissionsDone = (campaign.submissionsDone || 0) + 1;
+          campaign.aiPass = (campaign.aiPass || 0) + 1;
+          if (campaign.submissionsDone >= (campaign.submissionsTotal || 1)) {
+            campaign.status = "completed";
+          }
+          await campaign.save({ session });
+        }
       } else if (decision === "rejected") {
         submission.status = "Rejected";
       } else {

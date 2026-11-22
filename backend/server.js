@@ -17,7 +17,59 @@ app.use((req, res, next) => {
   res.set("X-Content-Type-Options", "nosniff");
   res.set("X-Frame-Options", "DENY");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.set("X-XSS-Protection", "1; mode=block");
+  res.set("Cross-Origin-Opener-Policy", "same-origin");
+  res.set("Cross-Origin-Resource-Policy", "cross-origin");
   next();
+});
+
+// In-memory sliding-window rate limiter
+function createRateLimiter({ windowMs, max, message }) {
+  const store = new Map();
+  // Periodically clean up expired entries
+  const interval = setInterval(() => {
+    const now = Date.now();
+    for (const [ip, entry] of store.entries()) {
+      if (now > entry.resetTime) store.delete(ip);
+    }
+  }, 60000);
+  interval.unref?.();
+
+  return (req, res, next) => {
+    if (process.env.NODE_ENV === "test") return next();
+    const ip = req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
+    const now = Date.now();
+    const record = store.get(ip) || { count: 0, resetTime: now + windowMs };
+
+    if (now > record.resetTime) {
+      record.count = 1;
+      record.resetTime = now + windowMs;
+    } else {
+      record.count += 1;
+    }
+    store.set(ip, record);
+
+    res.set("X-RateLimit-Limit", max);
+    res.set("X-RateLimit-Remaining", Math.max(0, max - record.count));
+    res.set("X-RateLimit-Reset", Math.ceil(record.resetTime / 1000));
+
+    if (record.count > max) {
+      return res.status(429).json({ error: message || "Too many requests. Please try again later." });
+    }
+    next();
+  };
+}
+
+const authLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many authentication attempts. Please try again in 15 minutes.",
+});
+
+const aiLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: "AI analysis rate limit reached. Please try again later.",
 });
 
 // Middleware
@@ -67,10 +119,11 @@ app.use("/api", (req, res, next) => {
 });
 
 // API routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/reviews/ai-review", aiLimiter);
 app.use("/api/reviews", reviewRoutes);
 
 // 404 handler

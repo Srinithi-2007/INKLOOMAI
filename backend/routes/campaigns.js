@@ -94,6 +94,9 @@ router.post("/", authMiddleware, requireRole("brand"), async (req, res) => {
 // PUT /api/campaigns/:id - update campaign (brand only)
 router.put("/:id", authMiddleware, requireRole("brand"), async (req, res) => {
   try {
+    if (!/^[a-f\d]{24}$/i.test(req.params.id)) {
+      return res.status(400).json({ error: "Invalid campaign identifier" });
+    }
     const allowed = ["name", "objective", "date", "dateLabel", "channels", "brief", "cover"];
     const updates = Object.fromEntries(
       Object.entries(req.body || {}).filter(([key]) => allowed.includes(key))
