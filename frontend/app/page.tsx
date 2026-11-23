@@ -1,7 +1,6 @@
 import Header from "@/components/ui/Header";
 import Footer from "@/components/ui/Footer";
 import Icon from "@/components/ui/Icon";
-import HeroPolygonNetwork from "@/components/ui/HeroPolygonNetwork";
 import Link from "next/link";
 
 const features = [
@@ -48,72 +47,93 @@ const steps = [
 export default function LandingPage() {
   return (
     <div className="relative min-h-screen bg-[#070510] text-white selection:bg-violet-600/40 selection:text-white">
-      {/* Top Navbar */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Header showNav dark />
-      </div>
-
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 sm:pt-20 sm:pb-28">
-        {/* Abstract Glowing 3D Polygon Network & Atmospheric Gradients */}
-        <HeroPolygonNetwork />
-
-        <div className="relative mx-auto flex max-w-4xl flex-col items-center px-4 text-center sm:px-6">
-          {/* Pill Badge */}
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-950/60 px-3.5 py-1 text-xs font-medium tracking-wide text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.2)] backdrop-blur-sm">
-            <Icon name="sparkles" size={13} className="text-violet-400" />
-            AI-Powered Brand Governance
-          </span>
-
-          {/* Main Headline */}
-          <h1 className="mt-5 font-heading text-3xl font-bold tracking-tight text-white sm:text-5xl md:text-[54px] md:leading-[1.12]">
-            Your Brand. Your Voice.
-            <span className="mt-1 block bg-gradient-to-r from-violet-400 via-fuchsia-400 to-indigo-300 bg-clip-text text-transparent">
-              Perfectly Protected.
-            </span>
-          </h1>
-
-          {/* Supporting Description */}
-          <p className="mt-4 max-w-[480px] text-sm leading-relaxed text-slate-300/90 sm:text-base">
-            Create, review, and manage content with AI-powered brand governance. Bring teams and creators together
-            while keeping every asset impeccably on-brand.
-          </p>
-
-          {/* Call to Action Buttons */}
-          <div className="mt-7 flex w-full max-w-[360px] flex-col gap-3">
-            <Link
-              href="/role"
-              className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#6366F1] via-[#7C3AED] to-[#8B5CF6] px-6 text-sm font-semibold text-white shadow-[0_0_24px_rgba(124,58,237,0.4)] transition-all duration-200 hover:from-[#4F46E5] hover:via-[#6D28D9] hover:to-[#7C3AED] hover:shadow-[0_0_34px_rgba(124,58,237,0.6)] active:scale-[0.99]"
-            >
-              <span>Get Started</span>
-              <Icon name="arrow-right" size={15} />
-            </Link>
-            <Link
-              href="#features"
-              className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.03] px-6 text-sm font-medium text-white backdrop-blur-sm transition-all duration-200 hover:border-violet-400/50 hover:bg-white/[0.08] active:scale-[0.99]"
-            >
-              <Icon name="compass" size={16} className="text-violet-300" />
-              <span>Explore Features</span>
-            </Link>
-          </div>
-
-          {/* Trust Indicator */}
-          <div className="mt-5 flex items-center justify-center gap-2 text-xs font-medium text-slate-400">
-            <span className="flex -space-x-2" aria-hidden="true">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#090518] bg-violet-600 text-[10px] font-semibold text-white shadow-sm">
-                AC
-              </span>
-              <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#090518] bg-indigo-600 text-[10px] font-semibold text-white shadow-sm">
-                SK
-              </span>
-              <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#090518] bg-emerald-600 text-[10px] font-semibold text-emerald-100 shadow-sm">
-                BL
-              </span>
-            </span>
-            <span>Trusted by 2,400+ governance leaders</span>
-          </div>
+      {/* Hero & Top Navigation with Pinterest Futuristic Background */}
+      <div className="relative overflow-hidden">
+        {/* Full-width Pinterest Image Background with Cover, Center, and Dark Violet Overlay */}
+        <div
+          className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/images/hero-bg.jpg')",
+          }}
+          aria-hidden="true"
+        >
+          {/* Subtle dark violet transparent overlay */}
+          <div className="absolute inset-0 bg-[#070510]/75 bg-gradient-to-b from-[#070510]/70 via-[#0d0722]/75 to-[#070510]" />
+          {/* Ambient subtle violet center glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(124,58,237,0.16)_0%,_transparent_70%)]" />
         </div>
-      </section>
+
+        {/* Top Navbar */}
+        <div className="relative z-30 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Header showNav dark />
+        </div>
+
+        {/* Hero Section */}
+        <section className="relative z-10 pt-12 pb-20 sm:pt-20 sm:pb-28">
+          <div className="relative mx-auto flex max-w-4xl flex-col items-center px-4 text-center sm:px-6">
+            {/* Pill Badge */}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-950/60 px-3.5 py-1 text-xs font-medium tracking-wide text-violet-300 shadow-[0_0_15px_rgba(139,92,246,0.2)] backdrop-blur-sm">
+              <Icon name="sparkles" size={13} className="text-violet-400" />
+              AI-Powered Brand Governance
+            </span>
+
+            {/* Main Headline */}
+            <h1 className="mt-5 font-heading text-3xl font-bold tracking-tight text-white sm:text-5xl md:text-[54px] md:leading-[1.12]">
+              Your Brand. Your Voice.
+              <span
+                className="mt-1 block"
+                style={{
+                  background: "linear-gradient(90deg, #A78BFA 0%, #E879F9 50%, #818CF8 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Perfectly Protected.
+              </span>
+            </h1>
+
+            {/* Supporting Description */}
+            <p className="mt-4 max-w-[480px] text-sm leading-relaxed text-slate-300/90 sm:text-base">
+              Create, review, and manage content with AI-powered brand governance. Bring teams and creators together
+              while keeping every asset impeccably on-brand.
+            </p>
+
+            {/* Call to Action Buttons */}
+            <div className="mt-7 flex w-full max-w-[360px] flex-col gap-3">
+              <Link
+                href="/role"
+                className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#6366F1] via-[#7C3AED] to-[#8B5CF6] px-6 text-sm font-semibold text-white shadow-[0_0_24px_rgba(124,58,237,0.4)] transition-all duration-200 hover:from-[#4F46E5] hover:via-[#6D28D9] hover:to-[#7C3AED] hover:shadow-[0_0_34px_rgba(124,58,237,0.6)] active:scale-[0.99]"
+              >
+                <span>Get Started</span>
+                <Icon name="arrow-right" size={15} />
+              </Link>
+              <Link
+                href="#features"
+                className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.03] px-6 text-sm font-medium text-white backdrop-blur-sm transition-all duration-200 hover:border-violet-400/50 hover:bg-white/[0.08] active:scale-[0.99]"
+              >
+                <Icon name="compass" size={16} className="text-violet-300" />
+                <span>Explore Features</span>
+              </Link>
+            </div>
+
+            {/* Trust Indicator */}
+            <div className="mt-5 flex items-center justify-center gap-2 text-xs font-medium text-slate-400">
+              <span className="flex -space-x-2" aria-hidden="true">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#090518] bg-violet-600 text-[10px] font-semibold text-white shadow-sm">
+                  AC
+                </span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#090518] bg-indigo-600 text-[10px] font-semibold text-white shadow-sm">
+                  SK
+                </span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#090518] bg-emerald-600 text-[10px] font-semibold text-emerald-100 shadow-sm">
+                  BL
+                </span>
+              </span>
+              <span>Trusted by 2,400+ governance leaders</span>
+            </div>
+          </div>
+        </section>
+      </div>
 
       {/* Capabilities / Features Section */}
       <section id="features" className="relative mx-auto mt-8 max-w-5xl px-4 sm:px-6 lg:px-8">
