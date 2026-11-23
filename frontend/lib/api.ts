@@ -372,9 +372,26 @@ export function reviewDecision(
   );
 }
 
-// Health
+// Health & Gemini Diagnostics
+export interface GeminiConfigStatus {
+  configured: boolean;
+  hasKey: boolean;
+  keySource: string;
+  model: string;
+}
+
 export function healthCheck() {
-  return request<{ status: string }>("/api/health");
+  return request<{
+    status: string;
+    database: string;
+    service: string;
+    gemini?: GeminiConfigStatus;
+    timestamp: string;
+  }>("/api/health");
+}
+
+export function getGeminiStatus() {
+  return request<GeminiConfigStatus>("/api/reviews/gemini-status");
 }
 
 // Brand DNA

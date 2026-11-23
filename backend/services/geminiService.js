@@ -12,22 +12,51 @@ function isScore(value) {
   return Number.isFinite(value) && value >= 0 && value <= 100;
 }
 
+const CANDIDATE_API_KEY_NAMES = [
+  "GEMINI_API_KEY",
+  "GOOGLE_API_KEY",
+  "GOOGLE_GEMINI_API_KEY",
+  "NEXT_PUBLIC_GEMINI_API_KEY",
+  "GEMINI_KEY",
+];
+
+function resolveGeminiApiKey() {
+  for (const name of CANDIDATE_API_KEY_NAMES) {
+    const raw = process.env[name];
+    if (typeof raw === "string") {
+      let cleaned = raw.trim();
+      if (
+        (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+        (cleaned.startsWith("'") && cleaned.endsWith("'"))
+      ) {
+        cleaned = cleaned.slice(1, -1).trim();
+      }
+      if (cleaned.length > 0 && cleaned !== "undefined" && cleaned !== "null") {
+        return { apiKey: cleaned, source: name };
+      }
+    }
+  }
+  return { apiKey: null, source: null };
+}
+
+function getGeminiDiagnostic() {
+  const { apiKey, source } = resolveGeminiApiKey();
+  const configured = Boolean(apiKey);
+  return {
+    configured,
+    hasKey: configured,
+    keySource: source || "none",
+    model: process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
+  };
+}
+
 async function runComplianceReview({
   content,
   brandGuidelines,
   campaignTitle,
   platform,
 }) {
-  let apiKey = process.env.GEMINI_API_KEY;
-  if (apiKey) {
-    apiKey = apiKey.trim();
-    if (
-      (apiKey.startsWith('"') && apiKey.endsWith('"')) ||
-      (apiKey.startsWith("'") && apiKey.endsWith("'"))
-    ) {
-      apiKey = apiKey.slice(1, -1).trim();
-    }
-  }
+  const { apiKey } = resolveGeminiApiKey();
   if (!apiKey) {
     throw new GeminiServiceError(
       "Gemini is not configured. Set GEMINI_API_KEY on the backend and retry.",
@@ -182,4 +211,9 @@ Scores and confidence must be numbers from 0 to 100. criticalRisk and tamperAler
   }
 }
 
-module.exports = { runComplianceReview, GeminiServiceError };
+module.exports = {
+  runComplianceReview,
+  GeminiServiceError,
+  resolveGeminiApiKey,
+  getGeminiDiagnostic,
+};

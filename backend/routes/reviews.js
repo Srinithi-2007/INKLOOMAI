@@ -6,7 +6,7 @@ const Assignment = require("../models/Assignment");
 const Campaign = require("../models/Campaign");
 const Revision = require("../models/Revision");
 const User = require("../models/User");
-const { runComplianceReview, GeminiServiceError } = require("../services/geminiService");
+const { runComplianceReview, GeminiServiceError, getGeminiDiagnostic } = require("../services/geminiService");
 const withMongoTransaction = require("../services/withMongoTransaction");
 const { authMiddleware, requireRole } = require("./auth");
 
@@ -146,6 +146,11 @@ router.post("/ai-review", authMiddleware, requireRole("freelancer"), async (req,
     console.error("AI review failed:", error.message);
     res.status(500).json({ error: "Could not analyze this submission" });
   }
+});
+
+// GET /api/reviews/gemini-status - safe diagnostic check (does not leak key or key length)
+router.get("/gemini-status", (req, res) => {
+  res.json(getGeminiDiagnostic());
 });
 
 router.get("/", authMiddleware, async (req, res) => {

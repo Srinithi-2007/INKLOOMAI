@@ -1,8 +1,10 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { connectToMongo } = require("./services/mongoConnection");
+const { getGeminiDiagnostic } = require("./services/geminiService");
 
 const authRoutes = require("./routes/auth");
 const campaignRoutes = require("./routes/campaigns");
@@ -94,6 +96,7 @@ app.get("/api/health", async (req, res) => {
       status: "ok",
       database: "connected",
       service: "inkloom-backend",
+      gemini: getGeminiDiagnostic(),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -102,6 +105,7 @@ app.get("/api/health", async (req, res) => {
       status: "degraded",
       database: "disconnected",
       service: "inkloom-backend",
+      gemini: getGeminiDiagnostic(),
       timestamp: new Date().toISOString(),
     });
   }
