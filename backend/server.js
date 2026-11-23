@@ -5,6 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { connectToMongo } = require("./services/mongoConnection");
 const { getGeminiDiagnostic } = require("./services/geminiService");
+const { verifyEmailTransport, getEmailConfigStatus } = require("./services/emailService");
 
 const authRoutes = require("./routes/auth");
 const campaignRoutes = require("./routes/campaigns");
@@ -23,6 +24,7 @@ app.use((req, res, next) => {
   res.set("X-Content-Type-Options", "nosniff");
   res.set("X-Frame-Options", "DENY");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  
   res.set("X-XSS-Protection", "1; mode=block");
   res.set("Cross-Origin-Opener-Policy", "same-origin");
   res.set("Cross-Origin-Resource-Policy", "cross-origin");
@@ -97,6 +99,7 @@ app.get("/api/health", async (req, res) => {
       database: "connected",
       service: "inkloom-backend",
       gemini: getGeminiDiagnostic(),
+      email: getEmailConfigStatus(),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -106,6 +109,7 @@ app.get("/api/health", async (req, res) => {
       database: "disconnected",
       service: "inkloom-backend",
       gemini: getGeminiDiagnostic(),
+      email: getEmailConfigStatus(),
       timestamp: new Date().toISOString(),
     });
   }
@@ -171,6 +175,21 @@ async function startLocalServer() {
   } catch (error) {
     console.error("MongoDB connection error:", error.message);
   }
+
+  if (process.env.EMAIL_ENABLED === "true") {
+    verifyEmailTransport()
+      .then((res) => {
+        if (res.verified) {
+          console.log("Gmail SMTP transport verified successfully.");
+        } else {
+          console.warn("Gmail SMTP verification notice:", res.error || res.reason);
+        }
+      })
+      .catch((err) => {
+        console.warn("Gmail SMTP verification error:", err.message);
+      });
+  }
+
   startServer();
 }
 

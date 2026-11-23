@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { sendWelcomeEmail, sendLoginNotificationEmail } = require("../services/emailService");
 
 function getJwtSecret() {
   let secret = process.env.JWT_SECRET;
@@ -122,6 +123,11 @@ router.post("/register", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // Trigger welcome email asynchronously without blocking registration response
+    sendWelcomeEmail(user).catch((err) => {
+      console.error("Welcome email delivery notice:", err.message);
+    });
+
     res.status(201).json({
       success: true,
       user: user.toPublicJSON(),
@@ -166,6 +172,16 @@ router.post("/login", async (req, res) => {
     res.cookie("token", token, {
       ...getCookieOptions(),
       maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Trigger login notification email asynchronously without blocking login response
+    const loginMetadata = {
+      timestamp: new Date().toISOString(),
+      userAgent: req.headers["user-agent"] || "unknown",
+      ip: req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown",
+    };
+    sendLoginNotificationEmail(user, loginMetadata).catch((err) => {
+      console.error("Login notification email delivery notice:", err.message);
     });
 
     res.json({
