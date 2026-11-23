@@ -10,7 +10,7 @@ import {
   type ApiNotification,
 } from "@/lib/api";
 
-export default function NotificationBell() {
+export default function NotificationBell({ dark = false }: { dark?: boolean }) {
   const [notifications, setNotifications] = useState<ApiNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -114,7 +114,11 @@ export default function NotificationBell() {
         aria-label="View notifications"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[#e4dcf5] bg-white text-ink transition-colors hover:bg-lavender/40"
+        className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
+          dark
+            ? "border border-white/10 bg-white/[0.05] text-white hover:bg-white/10 hover:border-violet-500/40"
+            : "border border-[#e4dcf5] bg-white text-ink hover:bg-lavender/40"
+        }`}
       >
         <Icon name="bell" size={18} />
         {unreadCount > 0 && (
@@ -128,13 +132,19 @@ export default function NotificationBell() {
         <div
           role="region"
           aria-label="Notifications Dropdown"
-          className="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border border-[#ebe4f7] bg-white p-4 shadow-xl animate-in fade-in slide-in-from-top-2"
+          className={`absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 ${
+            dark
+              ? "border-white/10 bg-[#0d0920]/95 backdrop-blur-xl text-white"
+              : "border-[#ebe4f7] bg-white text-ink shadow-xl"
+          }`}
         >
-          <div className="flex items-center justify-between border-b border-[#f0ebfa] pb-3 mb-2">
+          <div className={`flex items-center justify-between border-b pb-3 mb-2 ${dark ? "border-white/10" : "border-[#f0ebfa]"}`}>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-ink">Notifications</h3>
+              <h3 className={`text-sm font-semibold ${dark ? "text-white" : "text-ink"}`}>Notifications</h3>
               {unreadCount > 0 && (
-                <span className="rounded-full bg-lavender px-2 py-0.5 text-[11px] font-medium text-primary">
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                  dark ? "bg-violet-950/80 border border-violet-500/30 text-violet-300" : "bg-lavender text-primary"
+                }`}>
                   {unreadCount} new
                 </span>
               )}
@@ -144,16 +154,16 @@ export default function NotificationBell() {
                 type="button"
                 disabled={loading}
                 onClick={handleMarkAllRead}
-                className="text-xs font-medium text-accent hover:underline disabled:opacity-50"
+                className={`text-xs font-medium hover:underline disabled:opacity-50 ${dark ? "text-violet-400" : "text-accent"}`}
               >
                 Mark all read
               </button>
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto divide-y divide-[#f5f1fc]">
+          <div className={`max-h-80 overflow-y-auto divide-y ${dark ? "divide-white/[0.06]" : "divide-[#f5f1fc]"}`}>
             {notifications.length === 0 ? (
-              <div className="py-8 text-center text-xs text-muted">
+              <div className={`py-8 text-center text-xs ${dark ? "text-slate-400" : "text-muted"}`}>
                 No notifications yet
               </div>
             ) : (
@@ -161,19 +171,25 @@ export default function NotificationBell() {
                 <div
                   key={notif.id}
                   className={`flex flex-col gap-1 p-2.5 transition-colors rounded-lg ${
-                    notif.read ? "bg-white hover:bg-canvas/50" : "bg-lavender/30 hover:bg-lavender/50"
+                    dark
+                      ? notif.read
+                        ? "bg-transparent hover:bg-white/[0.04]"
+                        : "bg-violet-950/40 hover:bg-violet-950/60"
+                      : notif.read
+                        ? "bg-white hover:bg-canvas/50"
+                        : "bg-lavender/30 hover:bg-lavender/50"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs font-semibold text-ink">{notif.title}</span>
-                    <span className="text-[10px] text-muted shrink-0">
+                    <span className={`text-xs font-semibold ${dark ? "text-white" : "text-ink"}`}>{notif.title}</span>
+                    <span className={`text-[10px] shrink-0 ${dark ? "text-slate-400" : "text-muted"}`}>
                       {new Date(notif.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </span>
                   </div>
-                  <p className="text-xs text-ink-body leading-relaxed">{notif.message}</p>
+                  <p className={`text-xs leading-relaxed ${dark ? "text-slate-300" : "text-ink-body"}`}>{notif.message}</p>
                   <div className="mt-1 flex items-center justify-between">
                     {notif.link ? (
                       <Link
@@ -182,7 +198,7 @@ export default function NotificationBell() {
                           if (!notif.read) handleMarkRead(notif.id);
                           setOpen(false);
                         }}
-                        className="text-[11px] font-semibold text-accent hover:underline"
+                        className={`text-[11px] font-semibold hover:underline ${dark ? "text-violet-400" : "text-accent"}`}
                       >
                         View &rarr;
                       </Link>
@@ -193,7 +209,7 @@ export default function NotificationBell() {
                       <button
                         type="button"
                         onClick={() => handleMarkRead(notif.id)}
-                        className="text-[10px] text-muted hover:text-ink"
+                        className={`text-[10px] hover:text-white ${dark ? "text-slate-400" : "text-muted"}`}
                       >
                         Mark read
                       </button>
