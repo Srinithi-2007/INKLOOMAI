@@ -116,13 +116,15 @@ export default function NotificationBell({ dark = false }: { dark?: boolean }) {
         onClick={() => setOpen((prev) => !prev)}
         className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
           dark
-            ? "border border-white/10 bg-white/[0.05] text-white hover:bg-white/10 hover:border-violet-500/40"
+            ? "border border-white/10 bg-white/[0.05] text-white hover:bg-white/10 hover:border-emerald-500/40"
             : "border border-[#e4dcf5] bg-white text-ink hover:bg-lavender/40"
         }`}
       >
         <Icon name="bell" size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent px-1 text-[11px] font-bold text-white shadow-sm animate-pulse">
+          <span className={`absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[11px] font-bold text-white shadow-sm animate-pulse ${
+            dark ? "bg-emerald-500" : "bg-accent"
+          }`}>
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -134,7 +136,7 @@ export default function NotificationBell({ dark = false }: { dark?: boolean }) {
           aria-label="Notifications Dropdown"
           className={`absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 ${
             dark
-              ? "border-white/10 bg-[#0d0920]/95 backdrop-blur-xl text-white"
+              ? "border-emerald-900/40 bg-[#07120B]/95 backdrop-blur-xl text-white"
               : "border-[#ebe4f7] bg-white text-ink shadow-xl"
           }`}
         >
@@ -143,7 +145,7 @@ export default function NotificationBell({ dark = false }: { dark?: boolean }) {
               <h3 className={`text-sm font-semibold ${dark ? "text-white" : "text-ink"}`}>Notifications</h3>
               {unreadCount > 0 && (
                 <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                  dark ? "bg-violet-950/80 border border-violet-500/30 text-violet-300" : "bg-lavender text-primary"
+                  dark ? "bg-emerald-950/80 border border-emerald-500/30 text-emerald-300" : "bg-lavender text-primary"
                 }`}>
                   {unreadCount} new
                 </span>
@@ -154,7 +156,7 @@ export default function NotificationBell({ dark = false }: { dark?: boolean }) {
                 type="button"
                 disabled={loading}
                 onClick={handleMarkAllRead}
-                className={`text-xs font-medium hover:underline disabled:opacity-50 ${dark ? "text-violet-400" : "text-accent"}`}
+                className={`text-xs font-medium hover:underline disabled:opacity-50 ${dark ? "text-emerald-400" : "text-accent"}`}
               >
                 Mark all read
               </button>
@@ -174,7 +176,7 @@ export default function NotificationBell({ dark = false }: { dark?: boolean }) {
                     dark
                       ? notif.read
                         ? "bg-transparent hover:bg-white/[0.04]"
-                        : "bg-violet-950/40 hover:bg-violet-950/60"
+                        : "bg-emerald-950/40 hover:bg-emerald-950/60"
                       : notif.read
                         ? "bg-white hover:bg-canvas/50"
                         : "bg-lavender/30 hover:bg-lavender/50"
@@ -198,7 +200,7 @@ export default function NotificationBell({ dark = false }: { dark?: boolean }) {
                           if (!notif.read) handleMarkRead(notif.id);
                           setOpen(false);
                         }}
-                        className={`text-[11px] font-semibold hover:underline ${dark ? "text-violet-400" : "text-accent"}`}
+                        className={`text-[11px] font-semibold hover:underline ${dark ? "text-emerald-400" : "text-accent"}`}
                       >
                         View &rarr;
                       </Link>

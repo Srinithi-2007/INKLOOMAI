@@ -62,7 +62,7 @@ export default function Header({ right, showNav = false, dark = false }: HeaderP
                 <Link
                   href={currentUser.role === "brand" ? "/brand" : "/freelancer"}
                   className={`whitespace-nowrap text-sm font-semibold transition-colors ${
-                    dark ? "text-violet-400 hover:text-violet-300 hover:underline" : "text-accent hover:underline"
+                    dark ? "text-emerald-400 hover:text-emerald-300 hover:underline" : "text-accent hover:underline"
                   }`}
                 >
                   {currentUser.role === "brand" ? "Brand Dashboard" : "Freelancer Dashboard"}
@@ -87,7 +87,7 @@ export default function Header({ right, showNav = false, dark = false }: HeaderP
                 <Link
                   href="/role?intent=signin"
                   className={`whitespace-nowrap text-sm font-semibold transition-colors ${
-                    dark ? "text-violet-400 hover:text-violet-300 hover:underline" : "text-accent hover:underline"
+                    dark ? "text-emerald-400 hover:text-emerald-300 hover:underline" : "text-accent hover:underline"
                   }`}
                 >
                   Sign In
@@ -95,7 +95,7 @@ export default function Header({ right, showNav = false, dark = false }: HeaderP
                 {dark ? (
                   <Link
                     href="/role"
-                    className="inline-flex h-9 min-h-[36px] items-center justify-center rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-3.5 text-xs font-semibold text-white shadow-[0_0_15px_rgba(124,58,237,0.4)] transition-all hover:from-violet-500 hover:to-indigo-500"
+                    className="inline-flex h-9 min-h-[36px] items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3.5 text-xs font-semibold text-white shadow-sm shadow-emerald-950/40 transition-all"
                   >
                     Get Started
                   </Link>
@@ -133,7 +133,7 @@ export default function Header({ right, showNav = false, dark = false }: HeaderP
             <div
               className={`absolute left-0 right-0 top-16 z-50 flex flex-col gap-3 rounded-b-2xl border border-t-0 p-4 sm:hidden ${
                 dark
-                  ? "border-white/10 bg-[#0c081e]/95 backdrop-blur-xl text-white shadow-2xl"
+                  ? "border-emerald-900/40 bg-[#07120B]/95 backdrop-blur-xl text-white shadow-2xl"
                   : "border-[#e4dcf5] bg-white text-ink shadow-card"
               }`}
               role="dialog"
@@ -163,7 +163,7 @@ export default function Header({ right, showNav = false, dark = false }: HeaderP
                     href={currentUser.role === "brand" ? "/brand" : "/freelancer"}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex h-10 items-center rounded-lg px-3 text-sm font-semibold transition-colors ${
-                      dark ? "text-violet-400 hover:bg-white/10" : "text-accent hover:bg-lavender/50"
+                      dark ? "text-emerald-400 hover:bg-white/10" : "text-accent hover:bg-lavender/50"
                     }`}
                   >
                     {currentUser.role === "brand" ? "Brand Dashboard" : "Freelancer Dashboard"}
@@ -183,7 +183,7 @@ export default function Header({ right, showNav = false, dark = false }: HeaderP
                     href="/role?intent=signin"
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex h-10 items-center rounded-lg px-3 text-sm font-semibold transition-colors ${
-                      dark ? "text-violet-400 hover:bg-white/10" : "text-accent hover:bg-lavender/50"
+                      dark ? "text-emerald-400 hover:bg-white/10" : "text-accent hover:bg-lavender/50"
                     }`}
                   >
                     Sign In
@@ -192,7 +192,7 @@ export default function Header({ right, showNav = false, dark = false }: HeaderP
                     <Link
                       href="/role"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-5 text-sm font-semibold text-white shadow-[0_0_15px_rgba(124,58,237,0.4)]"
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 text-sm font-semibold text-white shadow-sm shadow-emerald-950/40"
                     >
                       Get Started
                     </Link>
@@ -215,7 +215,7 @@ export default function Header({ right, showNav = false, dark = false }: HeaderP
           <Link
             href="/"
             className={`text-xs font-medium transition-colors ${
-              dark ? "text-slate-400 hover:text-violet-400" : "text-muted hover:text-accent"
+              dark ? "text-slate-400 hover:text-emerald-400" : "text-muted hover:text-accent"
             }`}
           >
             ← Home

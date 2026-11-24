@@ -17,23 +17,23 @@ export default function Footer({ dark = false }: { dark?: boolean }) {
       <nav aria-label="Footer Navigation" className={`flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] ${
         dark ? "text-slate-400" : "text-muted"
       }`}>
-        <Link href="/#features" className={dark ? "hover:text-violet-300 transition-colors" : "hover:text-accent"}>
+        <Link href="/#features" className={dark ? "hover:text-emerald-300 transition-colors" : "hover:text-accent"}>
           Features
         </Link>
-        <Link href="/#how-it-works" className={dark ? "hover:text-violet-300 transition-colors" : "hover:text-accent"}>
+        <Link href="/#how-it-works" className={dark ? "hover:text-emerald-300 transition-colors" : "hover:text-accent"}>
           How it works
         </Link>
         <button
           type="button"
           onClick={() => setActiveModal("privacy")}
-          className={`${dark ? "hover:text-violet-300" : "hover:text-accent"} focus:outline-none transition-colors`}
+          className={`${dark ? "hover:text-emerald-300" : "hover:text-accent"} focus:outline-none transition-colors`}
         >
           Privacy
         </button>
         <button
           type="button"
           onClick={() => setActiveModal("terms")}
-          className={`${dark ? "hover:text-violet-300" : "hover:text-accent"} focus:outline-none transition-colors`}
+          className={`${dark ? "hover:text-emerald-300" : "hover:text-accent"} focus:outline-none transition-colors`}
         >
           Terms
         </button>
@@ -56,7 +56,7 @@ export default function Footer({ dark = false }: { dark?: boolean }) {
             aria-labelledby="footer-modal-title"
             className={`w-full max-w-lg p-6 text-left rounded-2xl border ${
               dark
-                ? "border-white/10 bg-[#0d0920] text-white shadow-2xl"
+                ? "border-emerald-900/40 bg-[#07120B] text-white shadow-2xl"
                 : "card border-[#ebe4f7] bg-white text-ink shadow-card"
             }`}
             onClick={(event) => event.stopPropagation()}
